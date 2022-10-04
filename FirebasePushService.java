@@ -1,5 +1,3 @@
-package birdr.life.firebase;
-
 import java.io.IOException;
 import java.util.List;
 
