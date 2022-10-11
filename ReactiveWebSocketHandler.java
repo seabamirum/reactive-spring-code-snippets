@@ -1,5 +1,3 @@
-package birdr.life.ws;
-
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
@@ -37,12 +35,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.firebase.messaging.Notification;
 
-import birdr.life.birder.BirderRepo;
-import birdr.life.firebase.FirebasePushService;
-import birdr.life.message.ChatRepo;
-import birdr.life.message.Message;
-import birdr.life.message.MessageRepo;
-import birdr.life.security.UserService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
@@ -51,7 +43,7 @@ import reactor.core.publisher.Sinks.Many;
 @Component
 public class ReactiveWebSocketHandler implements WebSocketHandler 
 {	
-	Logger logger = LoggerFactory.getLogger(ReactiveWebSocketHandler.class);
+    Logger logger = LoggerFactory.getLogger(ReactiveWebSocketHandler.class);
 	
     private ObjectMapper objectMapper = JsonMapper.builder().serializationInclusion(Include.NON_NULL).build();
     
@@ -64,7 +56,7 @@ public class ReactiveWebSocketHandler implements WebSocketHandler
     private FirebasePushService firebasePushService;
     
     @Autowired
-    private BirderRepo birderRepo;
+    private UserRepo userRepo;
 	
     @PostConstruct
     private void init()
@@ -114,11 +106,11 @@ public class ReactiveWebSocketHandler implements WebSocketHandler
 		if (cachedToken != null)
 			tokenMono = Mono.just(cachedToken);
 		else
-			tokenMono = birderRepo.loadFirebaseToken(toUsername).doOnNext(token -> firebaseTokenCache.put(toUsername,token));
+			tokenMono = userRepo.loadFirebaseToken(toUsername).doOnNext(token -> firebaseTokenCache.put(toUsername,token));
 		
 		return tokenMono.flatMap(token ->
 		{
-			return birderRepo.miniProfile(msg.getFromUsername()).flatMap(fromUser -> 
+			return userRepo.miniProfile(msg.getFromUsername()).flatMap(fromUser -> 
 			{
 				String title = "Convo with " + fromUser.getFirstName();
 				String body = "@" + msg.getFromUsername() + ": " + msg.getText();
